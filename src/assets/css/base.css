@@ -1,6 +1,3 @@
-/*base.css是用于做全局基础cssg规范的文件，在app.vue中使用
-normalize.css 是一个可以定制的CSS文件，它让不同的浏览器在渲染网页元素的时候形式更统一
-*/
 @import "./normalize.css";
 
 /*:root -> 获取根元素html*/
