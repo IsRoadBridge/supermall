@@ -2,14 +2,14 @@
   <div id="home" >
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
     <!--使用swiper插件实现轮播图，并将轮播图封装成子组件，使主页更规范-->
-    <better-scroll class="content" ref="scroll">
+    <better-scroll class="content" ref="scroll" @scroll="showTrue" @pullingUp="loadMore">
       <home-swiper :banners="banners"></home-swiper>
       <Recommend :recommends="recommends"></Recommend>
       <img-com></img-com>
       <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"></tab-control>
       <goods-list :goods="goods[currentType].list"></goods-list>
     </better-scroll>
-    <back-top @click.native="toTop"></back-top>
+    <back-top @click.native="toTop" v-show="show"></back-top>
   </div>
 </template>
 
@@ -42,11 +42,12 @@
           banners: [],
           recommends: [],
           goods: {
-              'pop': {page: 1,list: []},
-              'new': {page: 1,list: []},
-              'sell': {page: 1,list: []},
+              'pop': {page: 0,list: []},
+              'new': {page: 0,list: []},
+              'sell': {page: 0,list: []},
           },
-          currentType: 'pop'
+          currentType: 'pop',
+          show: false
         }
     },
       //调用组件创建完成方法，将获取的数据存到定义的变量中
@@ -73,9 +74,18 @@
               }
           },
 
+          //回到顶部
           toTop(){
-              console.log('111')
               this.$refs.scroll.toTop(0,0)
+          },
+          //通过监听y轴控制回到顶部按钮显示与否
+          showTrue(position){
+              this.show = position.y < -1000
+          },
+          //实现上拉加载更多，并调用scroll的finishPullUp方法，让下一次上拉加载更多也生效
+          loadMore(){
+              this.getGoods(this.currentType)
+              this.$refs.scroll.scroll.finishPullUp()
           },
         /*网络请求相关方法*/
         getHomeData(){
@@ -85,7 +95,7 @@
             })
         },
         getGoods(type){
-           const page = this.goods[type].page
+           const page = this.goods[type].page +1
             getHomeGoods(type,page).then(res => {
                 this.goods[type].list.push(...res.data.list)
             })
