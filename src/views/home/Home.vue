@@ -7,7 +7,7 @@
       <Recommend :recommends="recommends"></Recommend>
       <img-com></img-com>
       <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"></tab-control>
-      <goods-list :goods="goods[currentType].list"></goods-list>
+      <goods-list :goods="goods[currentType].list" @loadRefresh="refresh"></goods-list>
     </better-scroll>
     <back-top @click.native="toTop" v-show="show"></back-top>
   </div>
@@ -86,6 +86,19 @@
           loadMore(){
               this.getGoods(this.currentType)
               this.$refs.scroll.scroll.finishPullUp()
+          },
+          //每次图片加载完成都调用scroll的refresh刷新高度
+          refresh(){
+             this.debounce(this.$refs.scroll.lessRefresh(),1000)
+          },
+          debounce(func, wait) {
+              let timer = null;
+              return function() {
+                  if (timer) clearTimeout(timer);
+                  timer = setTimeout(() => {
+                      func().apply(this,args)
+                  }, wait)
+              }
           },
         /*网络请求相关方法*/
         getHomeData(){

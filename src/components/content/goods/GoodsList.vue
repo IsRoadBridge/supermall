@@ -2,7 +2,7 @@
   <div class="good-list">
       <div class="good-list-item" v-for="item in goods">
           <a :href="item.link">
-            <img :src="item.show.img">
+            <img :src="item.show.img" @load="refresh">
           </a>
         <div class="goods-info">
           <p>{{item.title}}</p>
@@ -20,6 +20,12 @@
             goods: Array,
             default(){
                 return []
+            }
+        },
+        methods: {
+            //图片加载完成会调用vue的@load，然后再讲该方法传给父组件
+            refresh(){
+                this.$emit('loadRefresh')
             }
         }
     }

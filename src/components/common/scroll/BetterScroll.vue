@@ -35,6 +35,10 @@
         methods:{
             toTop(x,y){
                 this.scroll.scrollTo(x,y,1000)
+            },
+            lessRefresh(){
+                console.log('11333')
+                this.scroll.refresh()
             }
         }
     }
