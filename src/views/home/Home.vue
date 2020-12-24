@@ -1,12 +1,17 @@
 <template>
   <div id="home" >
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
+    <tab-control :titles="['流行','新款','精选']"
+                 ref="tabControl1"
+                 @tabClick="tabClick" :class="{showControl:isShowControl}"></tab-control>
     <!--使用swiper插件实现轮播图，并将轮播图封装成子组件，使主页更规范-->
     <better-scroll class="content" ref="scroll" @scroll="showTrue" @pullingUp="loadMore">
-      <home-swiper :banners="banners"></home-swiper>
+      <home-swiper :banners="banners" @getHeight="getImgHeight"></home-swiper>
       <Recommend :recommends="recommends"></Recommend>
       <img-com></img-com>
-      <tab-control :titles="['流行','新款','精选']" class="tab-control" @tabClick="tabClick"></tab-control>
+      <tab-control :titles="['流行','新款','精选']"
+                   ref="tabControl2"
+                   @tabClick="tabClick"></tab-control>
       <goods-list :goods="goods[currentType].list" @loadRefresh="refresh"></goods-list>
     </better-scroll>
     <back-top @click.native="toTop" v-show="show"></back-top>
@@ -25,6 +30,7 @@
   import HomeSwiper from "./childcomponents/HomeSwiper";
   import Recommend from "./childcomponents/Recommend";
   import ImgCom from "./childcomponents/ImgCom";
+  import BScroll from "better-scroll";
   export default {
     name: "Home",
     components: {
@@ -47,7 +53,10 @@
               'sell': {page: 0,list: []},
           },
           currentType: 'pop',
-          show: false
+          show: false,
+          offsetTop: 0,
+          isShowControl: false,
+          saveY: 0
         }
     },
       //调用组件创建完成方法，将获取的数据存到定义的变量中
@@ -57,9 +66,18 @@
         this.getGoods('new')
         this.getGoods('sell')
     },
+      //切换回组件时，刷新scroll并立马跳转到离开时位置
+    activated() {
+        this.$refs.scroll.scroll.refresh()
+        this.$refs.scroll.toTop(0,this.saveY,0)
+      },
+      //离开组件时，保存scroll的y
+    deactivated(){
+        this.saveY = this.$refs.scroll.scroll.y
+      },
       methods: {
         /*普通方法*/
-          //将组件传出来的方法和值进行操作
+          //将组件传出来的方法和值进行操作并同步两个tab的currentIndex
           tabClick(index){
               switch (index) {
               case 0 :
@@ -72,15 +90,19 @@
                   this.currentType = 'sell'
                   break
               }
+              this.$refs.tabControl1.currentIndex = index
+              this.$refs.tabControl2.currentIndex = index
           },
 
           //回到顶部
           toTop(){
-              this.$refs.scroll.toTop(0,0)
+              this.$refs.scroll.toTop(0,0,1000)
           },
           //通过监听y轴控制回到顶部按钮显示与否
+          //动态判断固定tabcontrol显示与否
           showTrue(position){
               this.show = position.y < -1000
+              this.isShowControl = (-position.y) >this.offsetTop
           },
           //实现上拉加载更多，并调用scroll的finishPullUp方法，让下一次上拉加载更多也生效
           loadMore(){
@@ -100,6 +122,11 @@
                   }, wait)
               }
           },
+
+          getImgHeight(){
+              this.offsetTop = this.$refs.tabControl2.$el.offsetTop
+          },
+
         /*网络请求相关方法*/
         getHomeData(){
             getHome().then(res => {
@@ -136,10 +163,11 @@
     z-index: 9;
   }
 
-  .tab-control {
-    position: sticky; /*在页面内实现跟鼠标粘性粘贴，设置到顶部44px变成固定定位*/
-    top: 44px;
+  .showControl {
+    position: relative;
+    margin-top: 44px;
     background-color: #f6f6f6;
+    z-index: 9;
   }
 
   .content {

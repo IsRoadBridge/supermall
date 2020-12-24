@@ -1,9 +1,7 @@
 <template>
   <div class="good-list">
-      <div class="good-list-item" v-for="item in goods">
-          <a :href="item.link">
+      <div class="good-list-item" v-for="(item,index) in goods" @click="toDetail(index)">
             <img :src="item.show.img" @load="refresh">
-          </a>
         <div class="goods-info">
           <p>{{item.title}}</p>
           <span class="price">{{item.price}}</span>
@@ -26,6 +24,10 @@
             //图片加载完成会调用vue的@load，然后再讲该方法传给父组件
             refresh(){
                 this.$emit('loadRefresh')
+            },
+            //通过路由跳转到指定图片的详情页
+            toDetail(index){
+                this.$router.push('/detail/'+this.goods[index].iid)
             }
         }
     }

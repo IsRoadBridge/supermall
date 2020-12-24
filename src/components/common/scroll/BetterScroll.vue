@@ -33,8 +33,8 @@
           })
         },
         methods:{
-            toTop(x,y){
-                this.scroll.scrollTo(x,y,1000)
+            toTop(x,y,time){
+                this.scroll.scrollTo(x,y,time)
             },
             lessRefresh(){
                 console.log('11333')

@@ -2,7 +2,7 @@
   <Swiper>
     <SwiperItem v-for="item in banners">
       <a :href="item.link">
-        <img :src="item.image">
+        <img :src="item.image" @load="getHeight">
       </a>
     </SwiperItem>
   </Swiper>
@@ -16,9 +16,21 @@
         props: {
             banners: Array
         },
+        data(){
+            return {
+                isTrue: false
+            }
+        },
         components: {
             Swiper,
             SwiperItem
+        },
+        methods: {
+            getHeight(){
+                if(!this.isTrue)
+                this.$emit('getHeight')
+                this.isTrue = true
+            }
         }
     }
 </script>
